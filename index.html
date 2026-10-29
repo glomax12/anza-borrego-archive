@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Anza-Borrego Natural History Archive</title>
+<style>
+:root{--sand:#f5efe4;--ink:#2b2622;--muted:#6f655b;--accent:#b5562b;--card:#fff;--line:#e2d8c8;--sage:#5f7155}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--sand);color:var(--ink)}
+header{background:linear-gradient(90deg,#7a3e22,#b5562b 60%,#c98a4b);color:#fff;padding:18px 24px}
+header h1{margin:0;font-size:1.5rem;font-weight:650;letter-spacing:.2px}header p{margin:4px 0 0;opacity:.9;font-size:.92rem}
+.topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+.lang button{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.5);color:#fff;padding:5px 10px;border-radius:6px;cursor:pointer;font-weight:600}
+.lang button.on{background:#fff;color:var(--accent)}
+.banner{background:#fff6d8;border-bottom:1px solid #ecd99a;padding:8px 24px;font-size:.85rem;color:#6b5513}
+.searchwrap{position:relative;max-width:760px;margin:18px auto 6px;padding:0 16px}
+#q{width:100%;font-size:1.1rem;padding:13px 16px;border:2px solid var(--line);border-radius:10px;outline:none;background:#fff}
+#q:focus{border-color:var(--accent)}
+#ac{position:absolute;left:16px;right:16px;top:100%;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:20;display:none;max-height:340px;overflow:auto}
+#ac div{padding:9px 14px;cursor:pointer;border-bottom:1px solid #f1ebe1}#ac div:hover,#ac div.sel{background:#fbf3ea}
+#ac small{color:var(--muted)}
+.hint{max-width:760px;margin:0 auto;padding:0 18px;color:var(--muted);font-size:.85rem;min-height:1.3em}
+.hint a{color:var(--accent);cursor:pointer;font-weight:600}
+main{display:grid;grid-template-columns:270px 1fr;gap:20px;padding:12px 24px 40px;max-width:1400px;margin:0 auto}
+aside{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px;align-self:start;position:sticky;top:10px;font-size:.88rem}
+aside h3{margin:6px 0 8px;font-size:.78rem;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
+.tree ul{list-style:none;margin:0;padding-left:12px}.tree>ul{padding-left:0}
+.tree li{margin:2px 0}.tree span{cursor:pointer}.tree span:hover{color:var(--accent);text-decoration:underline}
+.tree .sci{font-style:italic;color:var(--muted);font-size:.8rem}
+.months{display:grid;grid-template-columns:repeat(6,1fr);gap:4px}
+.months button{border:1px solid var(--line);background:#faf7f2;border-radius:5px;padding:5px 0;font-size:.75rem;cursor:pointer}
+.months button.has{background:#efe0cf;font-weight:600}.months button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.months button:disabled{opacity:.35;cursor:default}
+label.chk{display:flex;gap:6px;align-items:center;margin:4px 0;cursor:pointer}
+.reset{margin-top:10px;background:none;border:none;color:var(--accent);cursor:pointer;padding:0;font-weight:600}
+.count{color:var(--muted);font-size:.9rem;margin:0 0 10px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
+.card{background:var(--card);border-radius:10px;overflow:hidden;border:1px solid var(--line);cursor:pointer;transition:transform .12s,box-shadow .12s}
+.card:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.1)}
+.card .im{aspect-ratio:3/2;background-size:cover;background-position:center;position:relative}
+.badge{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.6);color:#fff;font-size:.72rem;padding:3px 7px;border-radius:10px}
+.cons{position:absolute;top:8px;left:8px;background:#8a1c1c;color:#fff;font-size:.7rem;padding:3px 7px;border-radius:10px}
+.card .tx{padding:10px 12px}.card .cn{font-weight:650}.card .sn{font-style:italic;color:var(--muted);font-size:.88rem}
+.card .dt{font-size:.78rem;color:var(--muted);margin-top:4px}
+.modal{position:fixed;inset:0;background:rgba(20,15,10,.82);display:none;z-index:50;overflow:auto}
+.panel{background:#fff;max-width:1200px;margin:24px auto;border-radius:12px;overflow:hidden}
+.viewer{background:#111;position:relative;height:62vh;overflow:hidden;cursor:grab;touch-action:none}
+.viewer img{position:absolute;left:0;top:0;transform-origin:0 0;user-select:none;-webkit-user-drag:none;max-width:none}
+.vctl{position:absolute;right:10px;bottom:10px;display:flex;gap:6px}.vctl button{background:rgba(255,255,255,.85);border:none;border-radius:6px;width:34px;height:34px;font-size:1.1rem;cursor:pointer}
+.close{position:absolute;right:12px;top:10px;background:rgba(255,255,255,.9);border:none;border-radius:50%;width:36px;height:36px;font-size:1.3rem;cursor:pointer;z-index:3}
+.strip{display:flex;gap:6px;padding:8px;background:#222}.strip img{height:60px;border-radius:4px;opacity:.6;cursor:pointer;border:2px solid transparent}.strip img.on{opacity:1;border-color:var(--accent)}
+.info{padding:18px 24px 26px}.info h2{margin:0;font-size:1.5rem}.info .alt{color:var(--muted);margin-top:2px}
+.crumbs{margin:10px 0;font-size:.88rem}.crumbs a{color:var(--sage);cursor:pointer;text-decoration:none;border-bottom:1px dotted}.crumbs a:hover{color:var(--accent)}
+.facts{display:flex;flex-wrap:wrap;gap:8px 22px;font-size:.9rem;margin:12px 0}.facts b{color:var(--muted);font-weight:600;margin-right:4px}
+.consbox{background:#fbeaea;border-left:4px solid #8a1c1c;padding:8px 12px;font-size:.88rem;margin:10px 0}
+.idbox{background:#fff6d8;border-left:4px solid #d8b02c;padding:8px 12px;font-size:.88rem;margin:10px 0}
+details{border:1px solid var(--line);border-radius:8px;margin-top:14px}summary{padding:10px 14px;cursor:pointer;font-weight:600}
+details table{border-collapse:collapse;width:100%;font-size:.84rem}details td{padding:5px 14px;border-top:1px solid #f1ebe1;vertical-align:top}details td:first-child{color:var(--muted);width:240px;font-family:ui-monospace,Menlo,monospace;font-size:.78rem}
+.dl{margin-top:12px;font-size:.88rem}.dl a{color:var(--accent)}
+.tabs{display:flex;gap:4px;padding:0 24px;background:#7a3e22;overflow-x:auto}
+.tabs button{background:none;border:none;color:#f3e3d3;padding:12px 20px 10px;font-size:1rem;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap}
+.tabs button:hover{color:#fff}.tabs button.on{color:#fff;border-bottom-color:#f2c48d;background:rgba(255,255,255,.08)}
+.tabs .n{display:inline-block;min-width:22px;margin-left:6px;padding:1px 7px;border-radius:10px;background:rgba(255,255,255,.18);font-size:.78rem}
+.tabs .n.z{opacity:.5}
+.empty{background:#fff;border:1px dashed var(--line);border-radius:10px;padding:22px;color:var(--muted);line-height:1.5}
+.empty h3{margin:0 0 6px;color:var(--ink);font-size:1.05rem}
+.sec{margin:22px 0 10px;font-size:.8rem;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
+.pcard .im{display:flex;align-items:flex-end}.pcard .pl{background:linear-gradient(transparent,rgba(0,0,0,.65));color:#fff;width:100%;padding:28px 12px 10px;font-weight:650}
+.back{background:none;border:none;color:var(--accent);font-weight:600;cursor:pointer;padding:0;margin-bottom:10px}
+footer{text-align:center;color:var(--muted);font-size:.8rem;padding:20px}
+@media(max-width:800px){main{grid-template-columns:1fr}aside{position:static}}
+.dl a.zen{font-weight:600}.vhi{display:none;position:absolute;left:10px;bottom:10px;background:rgba(0,0,0,.65);color:#fff;font-size:12px;padding:4px 8px;border-radius:4px;z-index:3}</style></head><body>
+<header><div class="topbar"><div><h1 id="t_title"></h1><p id="t_sub"></p></div>
+<div class="lang"><button data-l="en">EN</button> <button data-l="es">ES</button></div></div></header>
+<nav class="tabs" id="tabs"></nav>
+<div class="banner" id="t_banner"></div>
+<div class="searchwrap"><input id="q" autocomplete="off"><div id="ac"></div></div>
+<div class="hint" id="hint"></div>
+<main><aside>
+<h3 id="t_browse"></h3><div class="tree" id="tree"></div>
+<h3 id="t_month" style="margin-top:16px"></h3><div class="months" id="months"></div>
+<div id="placebox"><h3 id="t_placeF" style="margin-top:16px"></h3><div class="months" id="placesF" style="grid-template-columns:1fr"></div></div>
+<div id="partbox"><h3 id="t_part" style="margin-top:16px"></h3><div class="months" id="parts" style="grid-template-columns:1fr 1fr"></div></div>
+<h3 id="t_filters" style="margin-top:16px"></h3>
+<label class="chk"><input type="checkbox" id="fcons"> <span id="t_cons"></span></label>
+<button class="reset" id="reset"></button>
+</aside><section><p class="count" id="count"></p><div class="grid" id="grid"></div></section></main>
+<div class="modal" id="modal"><div class="panel"><div class="viewer" id="viewer"><button class="close" id="close">×</button><img id="vimg"><div id="vhi" class="vhi"></div><div class="vctl"><button id="zin">+</button><button id="zout">−</button><button id="zfit">⤢</button></div></div>
+<div class="strip" id="strip"></div><div class="info" id="info"></div></div></div>
+<footer id="t_foot"></footer>
+<script>
+</script>
+<script src="data.js"></script>
+<script>
+const UI={en:{title:"Anza-Borrego Natural History Archive",sub:"Photographs and sound recordings of the flora, fauna and geology of Anza-Borrego Desert State Park",
+banner:"Prototype · bird identifications are suggestions awaiting the photographer's confirmation · precise localities not yet added",part:"Subject",idPhot:"Identified by the photographer.",phen:"Phenology",
+ph:"Search by common or scientific name — e.g. oriole, Icteridae, correcaminos",browse:"Browse by group",month:"Month observed",filters:"Filters",
+cons:"Species of conservation concern",reset:"Clear all",records:n=>`${n} record${n==1?"":"s"}`,photos:n=>`${n} photo${n==1?"":"s"}`,
+dym:"No matches. Did you mean",none:"No matches.",date:"Date",time:"Time (camera)",count:"Individuals",sex:"Sex",stage:"Life stage",beh:"Behaviour",with:"Pictured with",
+where:"Location",pending:"precise locality pending",sci:"Scientific details",idnote:"Identification status: suggested, awaiting confirmation.",
+gbif:"View taxon on GBIF",orig:"This photo: original file",hiLoad:"Loading full resolution from Zenodo…",hiDone:"Full resolution",zen:"Full-resolution originals on Zenodo",zcite:"Zenodo",cite:"Cite as",exif:"Photo",months:["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
+foot:"Prototype catalogue · Darwin Core & Audubon Core metadata · taxonomy: GBIF Backbone",male:"male",female:"female",adult:"adult",syn:"synonym of",pw:"pictured with",
+rank:{class:"class",order:"order",family:"family",genus:"genus",species:"species",record:"record",category:"category"},
+tabs:{fauna:"Fauna",flora:"Flora",geology:"Geology",places:"Places",built:"Built environment"},placeF:"Place",
+emBuilt:"No built-environment records yet.",emBuilt2:"Historic and abandoned structures, roads, mines and settlements of the park, recording its human history.",
+landH:"Landscapes and weather",withheld:"Location withheld to protect a sensitive species",withheldGrp:"Location withheld (sensitive species)",
+generalised:"precise location generalised to protect a sensitive species",fromFile:"from filename, to be confirmed",
+idUn:"Not yet identified; photographer's identification needed.",idDesc:"Description based on the photograph.",det:"Record details",
+emFlora:"No plant records yet.",emFlora2:"Photographs of plants, cacti, wildflowers and lichens will be catalogued here, with names following the Jepson eFlora.",
+assocH:"Plants pictured in other records",inRec:n=>`pictured in ${n} record${n==1?"":"s"}`,
+emGeo:"No geology records yet.",emGeo2:"Rocks, minerals, fossils and landforms of the park will appear here, organised by rock type, mineral and geological formation. Fossil-site locations are never shown publicly.",
+emFauna:"No animal records match.",emAny:"No records match in this tab.",
+placesH:"Places in the park",noLoc:"Locality not yet recorded",noLoc2:"Add a place name for each record (e.g. Borrego Palm Canyon) in the occurrences table and records will be grouped here by place.",
+allPlaces:"← All places",tabCount:(n,t)=>`${n} in ${t}`,also:"Also matching:",
+rank2:{}},
+es:{title:"Archivo de Historia Natural de Anza-Borrego",sub:"Fotografías y grabaciones de la flora, fauna y geología del Parque Estatal del Desierto Anza-Borrego",
+banner:"Prototipo · las identificaciones de aves son sugerencias pendientes de confirmación por el fotógrafo · aún sin localidades precisas",part:"Tema",idPhot:"Identificado por el fotógrafo.",phen:"Fenología",
+ph:"Busque por nombre común o científico — p. ej. bolsero, Icteridae, roadrunner, ocotillo",browse:"Explorar por grupo",month:"Mes de observación",filters:"Filtros",
+cons:"Especies de interés para la conservación",reset:"Borrar todo",records:n=>`${n} registro${n==1?"":"s"}`,photos:n=>`${n} foto${n==1?"":"s"}`,
+dym:"Sin resultados. ¿Quiso decir",none:"Sin resultados.",date:"Fecha",time:"Hora (cámara)",count:"Individuos",sex:"Sexo",stage:"Etapa de vida",beh:"Comportamiento",with:"Fotografiado con",
+where:"Ubicación",pending:"localidad precisa pendiente",sci:"Detalles científicos",idnote:"Estado de identificación: sugerida, pendiente de confirmación.",
+gbif:"Ver taxón en GBIF",orig:"Esta foto: archivo original",hiLoad:"Cargando resolución completa desde Zenodo…",hiDone:"Resolución completa",zen:"Originales en alta resolución en Zenodo",zcite:"Zenodo",cite:"Citar como",exif:"Foto",months:["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"],
+foot:"Catálogo prototipo · metadatos Darwin Core y Audubon Core · taxonomía: GBIF Backbone",male:"macho",female:"hembra",adult:"adulto",syn:"sinónimo de",pw:"fotografiado con",
+rank:{class:"clase",order:"orden",family:"familia",genus:"género",species:"especie",record:"registro",category:"categoría"},
+tabs:{fauna:"Fauna",flora:"Flora",geology:"Geología",places:"Lugares",built:"Entorno construido"},placeF:"Lugar",
+emBuilt:"Aún no hay registros del entorno construido.",emBuilt2:"Estructuras históricas y abandonadas, caminos, minas y asentamientos del parque, que registran su historia humana.",
+landH:"Paisajes y clima",withheld:"Ubicación reservada para proteger una especie sensible",withheldGrp:"Ubicación reservada (especies sensibles)",
+generalised:"ubicación precisa generalizada para proteger una especie sensible",fromFile:"tomado del nombre del archivo, por confirmar",
+idUn:"Aún sin identificar; se necesita la identificación del fotógrafo.",idDesc:"Descripción basada en la fotografía.",det:"Detalles del registro",
+emFlora:"Aún no hay registros de plantas.",emFlora2:"Aquí se catalogarán fotografías de plantas, cactus, flores silvestres y líquenes, con nombres según la Jepson eFlora.",
+assocH:"Plantas que aparecen en otros registros",inRec:n=>`aparece en ${n} registro${n==1?"":"s"}`,
+emGeo:"Aún no hay registros de geología.",emGeo2:"Aquí aparecerán rocas, minerales, fósiles y formas del relieve del parque, organizados por tipo de roca, mineral y formación geológica. Las ubicaciones de sitios fosilíferos nunca se muestran públicamente.",
+emFauna:"Ningún registro de animales coincide.",emAny:"Ningún registro coincide en esta pestaña.",
+placesH:"Lugares del parque",noLoc:"Localidad aún no registrada",noLoc2:"Agregue el nombre del lugar de cada registro (p. ej., Borrego Palm Canyon) en la tabla de registros y se agruparán aquí por lugar.",
+allPlaces:"← Todos los lugares",tabCount:(n,t)=>`${n} en ${t}`,also:"También coinciden:",
+rank2:{}}};
+let L=(navigator.language||"en").startsWith("es")?"es":"en", month=null, cur=null, mi=0, place=null, part=null;
+const TABS=["fauna","flora","geology","places","built"]; const DOMS=["fauna","flora","geology","places","built"]; let tab=TABS.includes(location.hash.slice(1))?location.hash.slice(1):"fauna";
+function setTab(t){tab=t;place=null;month=null;part=null;try{history.replaceState(null,"","#"+t)}catch(e){};tree();render()}
+const norm=s=>(s||"").toString().normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/'s\b/g,"").replace(/[^a-z0-9]+/g," ").trim();
+const H=D.higher, media=Object.fromEntries(D.media.map(m=>[m.identifier,m]));
+const hl=(sci,l)=>H[sci]?H[sci][l=="es"?1:0]:"";
+const cn=o=>L=="es"?o.vernacularName_es:o.vernacularName_en;
+D.occurrences.forEach(o=>{
+  o.mids=o.mediaIDs.split("; "); o.assoc=o.associatedTaxa?o.associatedTaxa.split("; ").map(s=>s.match(/\(([^)]+)\)$/)[1]):[];
+  const names=[o.acceptedNameUsage,o.scientificName,(o.regionalName||"").replace(/\(.*\)/,""),o.vernacularName_en,o.vernacularName_es,...o.vernacularAlternates_en.split("; "),...o.vernacularAlternates_es.split("; "),...o.synonyms.split("; ")];
+  const higherN=[o.genus,o.family,o.order,o.class,o.kingdom,...[o.family,o.order,o.class].flatMap(x=>H[x]||[])];
+  const assocN=o.assoc.flatMap(a=>[a,...(D.assocNames[a]||[])]);
+  o.nameText=names.map(norm).filter(Boolean); o.blobN=norm(names.join(" ")); o.blobH=norm(higherN.join(" ")+" "+(o.category_en||"")+" "+(o.category_es||"")+" "+(o.locationSensitivity=="withhold location"?"":(o.localityDetail||"")+" "+o.mids.map(x=>(media[x]||{}).locality||"").join(" ")));
+  o.blobC=norm([o.keywords_en,o.keywords_es,o.behavior,o.sex,o.lifeStage,o.subjectPart,o.subjectPart_es,o.phenology,o.phenology_es,o.reproductiveCondition,o.reproductiveCondition_es].join(" "));
+});
+// vocabulary for autocomplete + did-you-mean
+const VOC=[];const seen=new Set();
+function addV(label,sub,query,kind){const k=norm(label)+"|"+kind;if(!label||seen.has(k))return;seen.add(k);VOC.push({label,sub,query,kind,n:norm(label)})}
+D.occurrences.forEach(o=>{
+  const sp=o.acceptedNameUsage;
+  if(!sp){addV(o.vernacularName_en,null,o.vernacularName_en,"record");addV(o.vernacularName_es,null,o.vernacularName_es,"record");
+    if(o.category_en){addV(o.category_en,null,o.category_en,"category");addV(o.category_es,null,o.category_es,"category")}return;}
+  addV(o.vernacularName_en,sp,sp,"species");addV(o.vernacularName_es,sp,sp,"species");addV(sp,null,sp,"species");
+  o.vernacularAlternates_en.split("; ").concat(o.vernacularAlternates_es.split("; ")).forEach(a=>addV(a,sp,sp,"species"));
+  o.synonyms.split("; ").forEach(s=>addV(s,"syn:"+sp,sp,"synonym"));
+  addV(o.genus,null,o.genus,"genus");
+  ["family","order","class"].forEach(r=>{addV(o[r],"h:"+o[r],o[r],r);(H[o[r]]||[]).forEach(v=>addV(v,"h:"+o[r],o[r],r))});
+});
+function score(o,qn){ if(!qn)return 1; const toks=qn.split(" "); let s=0;
+  const words=(o.blobN+" "+o.blobH+" "+o.blobC).split(" ");
+  for(const t of toks){ if(!words.some(w=>w.startsWith(t)))return 0; }
+  if(o.nameText.includes(qn))s+=20; else if(o.nameText.some(n=>n.startsWith(qn)))s+=10;
+  for(const t of toks){ if(o.blobN.split(" ").some(w=>w.startsWith(t)))s+=3; else if(o.blobH.split(" ").some(w=>w.startsWith(t)))s+=2; else s+=.5;}
+  return s;}
+function lev(a,b){const m=a.length,n=b.length;if(!m)return n;if(!n)return m;let p=[...Array(n+1).keys()];for(let i=1;i<=m;i++){let c=[i];for(let j=1;j<=n;j++)c[j]=Math.min(p[j]+1,c[j-1]+1,p[j-1]+(a[i-1]==b[j-1]?0:1));p=c}return p[n]}
+function suggest(qn){let best=null,bd=99;for(const v of VOC){for(const cand of [v.n,...v.n.split(" ")]){const d=lev(qn,cand);if(d<bd){bd=d;best=v}}}
+  return bd<=Math.max(1,Math.floor(qn.length/4))?best:null;}
+const subTxt=v=>{const u=UI[L];if(!v.sub)return u.rank[v.kind]||v.kind;
+  if(v.sub.startsWith("syn:"))return `${u.syn} <i>${v.sub.slice(4)}</i>`; if(v.sub.startsWith("h:"))return `${u.rank[v.kind]} · ${hl(v.sub.slice(2),L)||v.sub.slice(2)}`;
+  if(v.sub.startsWith("pw"))return u.pw+(v.sub.length>3?` · <i>${v.sub.slice(3)}</i>`:""); return `<i>${v.sub}</i> · ${u.rank.species}`;};
+const q=document.getElementById("q"),ac=document.getElementById("ac");let acSel=-1;
+q.addEventListener("input",()=>{render();const qn=norm(q.value);if(!qn){ac.style.display="none";return}
+  const hits=VOC.filter(v=>v.n.includes(qn)).sort((a,b)=>(b.n.startsWith(qn)-a.n.startsWith(qn))||a.n.length-b.n.length).slice(0,8);
+  ac.innerHTML=hits.map((v,i)=>`<div data-q="${v.query}">${v.kind=="species"&&v.sub?v.label:(/^[A-Z][a-z]+( [a-z]+)?$/.test(v.label)&&v.kind!="assoc"?"<i>"+v.label+"</i>":v.label)} <small>— ${subTxt(v)}</small></div>`).join("");
+  ac.style.display=hits.length?"block":"none";acSel=-1;});
+ac.addEventListener("mousedown",e=>{const d=e.target.closest("div[data-q]");if(d){q.value=d.dataset.q;ac.style.display="none";render()}});
+q.addEventListener("keydown",e=>{const it=[...ac.querySelectorAll("div")];if(e.key=="ArrowDown"||e.key=="ArrowUp"){acSel=(acSel+(e.key=="ArrowDown"?1:-1)+it.length)%it.length;it.forEach((x,i)=>x.classList.toggle("sel",i==acSel));e.preventDefault()}
+  else if(e.key=="Enter"){if(acSel>=0&&it[acSel]){q.value=it[acSel].dataset.q;}ac.style.display="none";render()}else if(e.key=="Escape")ac.style.display="none"});
+q.addEventListener("blur",()=>setTimeout(()=>ac.style.display="none",150));
+function setQ(v){q.value=v;month=null;place=null;if(!results(tab).length){const t=DOMS.find(t=>results(t).length);if(t){tab=t;tree()}}render();window.scrollTo({top:0,behavior:"smooth"})}
+function results(dom){const qn=norm(q.value),cons=document.getElementById("fcons").checked;
+  return D.occurrences.map(o=>[o,score(o,qn)]).filter(([o,s])=>s>0&&(!dom||o.domain==dom)&&(!month||o.month==month)&&(place===null||placeOf(o)==place)&&(!part||o.subjectPart==part)&&(!cons||o.conservationStatus)).sort((a,b)=>b[1]-a[1]||a[0].eventDate.localeCompare(b[0].eventDate)).map(x=>x[0]);}
+function fmtDate(o){const d=new Date(o.eventDate.slice(0,10)+"T12:00:00");return d.toLocaleDateString(L=="es"?"es-MX":"en-US",{year:"numeric",month:"long",day:"numeric"})}
+const card=o=>{const u=UI[L];return `<div class="card" data-id="${o.occurrenceID}"><div class="im" style="background-image:url(${D.images[o.mids[0]]})">
+   ${o.mids.length>1?`<span class="badge">${u.photos(o.mids.length)}</span>`:""}${o.conservationStatus?`<span class="cons">${L=="es"?"Conservación":"Conservation"}</span>`:""}</div>
+   <div class="tx"><div class="cn">${cn(o)}${o.individualCount>1?" ×"+o.individualCount:""}</div><div class="sn" style="${o.acceptedNameUsage?"":"font-style:normal"}">${o.acceptedNameUsage||(L=="es"?o.category_es:o.category_en)}</div><div class="dt">${o.domain=="flora"?(L=="es"?o.subjectPart_es:o.subjectPart)+" · ":""}${fmtDate(o)}</div></div></div>`};
+const placeOf=o=>o.locationSensitivity=="withhold location"?"__withheld":(o.localityDetail||"");
+const placeLab=(k,u)=>k=="__withheld"?u.withheldGrp:(k||u.noLoc);
+function render(){const u=UI[L],qn=norm(q.value),G=document.getElementById("grid");
+  const per={};DOMS.forEach(t=>per[t]=results(t));const ALL=results(null);
+  document.getElementById("tabs").innerHTML=TABS.map(t=>{const n=per[t].length;
+    return `<button data-t="${t}" class="${t==tab?"on":""}">${u.tabs[t]}<span class="n ${n?"":"z"}">${n}</span></button>`}).join("");
+  document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>setTab(b.dataset.t));
+  const hint=document.getElementById("hint");hint.innerHTML="";
+  let R=per[tab], html="";
+  {
+    html=R.length?`<div class="grid">${R.map(card).join("")}</div>`:"";
+    if(tab=="flora"){
+      if(!R.length&&!qn)html=`<div class="empty"><h3>${u.emFlora}</h3>${u.emFlora2}</div>`;
+    }
+    if(tab=="geology"&&!R.length&&!qn)html=`<div class="empty"><h3>${u.emGeo}</h3>${u.emGeo2}</div>`;
+    if(tab=="places"&&!R.length&&!qn)html=`<div class="empty">${u.emAny}</div>`;
+    if(tab=="built"&&!R.length&&!qn)html=`<div class="empty"><h3>${u.emBuilt}</h3>${u.emBuilt2}</div>`;
+    if(!R.length&&qn&&!html){const other=DOMS.filter(t=>t!=tab&&per[t].length);
+      if(other.length)hint.innerHTML=`${u.also} `+other.map(t=>`<a data-t="${t}">${u.tabCount(per[t].length,u.tabs[t])}</a>`).join(" · ");
+      else{const s=suggest(qn);hint.innerHTML=s?`${u.dym} <a id="dym">${s.label}</a>?`:u.none;if(s)document.getElementById("dym").onclick=()=>setQ(s.query)}
+      html=`<div class="empty">${tab=="fauna"?u.emFauna:u.emAny}</div>`;}
+  }
+  document.getElementById("count").textContent=u.records(R.length)+" · "+u.photos(R.reduce((a,o)=>a+o.mids.length,0));
+  G.innerHTML=html; hint.querySelectorAll("a[data-t]").forEach(a=>a.onclick=()=>{tab=a.dataset.t;place=null;tree();render()});
+  G.querySelectorAll(".card[data-id]").forEach(c=>c.onclick=()=>openRec(c.dataset.id));
+  G.querySelectorAll(".card[data-p]").forEach(c=>c.onclick=()=>{place=c.dataset.p;render()});
+  G.querySelectorAll(".card[data-a]").forEach(c=>c.onclick=()=>{q.value=c.dataset.a;tab="fauna";tree();render()});
+  const bk=document.getElementById("back");if(bk)bk.onclick=()=>{place=null;render()};
+  const pool=D.occurrences.filter(o=>o.domain==tab);
+  const mb=document.getElementById("months");const has=new Set(pool.map(o=>o.month));
+  mb.innerHTML=u.months.map((m,i)=>`<button data-m="${i+1}" class="${has.has(i+1)?"has":""} ${month==i+1?"on":""}" ${has.has(i+1)?"":"disabled"}>${m}</button>`).join("");
+  mb.querySelectorAll("button").forEach(b=>b.onclick=()=>{const m=+b.dataset.m;month=month==m?null:m;render()});
+  const P={};pool.forEach(o=>P[o.subjectPart]=L=="es"?o.subjectPart_es:o.subjectPart);const pk=Object.keys(P);
+  document.getElementById("partbox").style.display=pk.length>1?"block":"none";
+  const PL={};pool.forEach(o=>{const k=placeOf(o);PL[k]=(PL[k]||0)+1});const rk=k=>k==""?2:k=="__withheld"?1:0;
+  const plk=Object.keys(PL).sort((a,b)=>rk(a)-rk(b)||a.localeCompare(b));
+  document.getElementById("placebox").style.display=plk.some(k=>k&&k!="__withheld")?"block":"none";
+  const pf=document.getElementById("placesF");pf.innerHTML=plk.map(k=>`<button data-pl="${k}" class="has ${place===k?"on":""}" style="text-align:left;padding:5px 8px">${placeLab(k,u)} (${PL[k]})</button>`).join("");
+  pf.querySelectorAll("button").forEach(b=>b.onclick=()=>{place=place===b.dataset.pl?null:b.dataset.pl;render()});
+  const pb=document.getElementById("parts");pb.innerHTML=pk.map(k=>`<button data-p="${k}" class="has ${part==k?"on":""}">${P[k]}</button>`).join("");
+  pb.querySelectorAll("button").forEach(b=>b.onclick=()=>{part=part==b.dataset.p?null:b.dataset.p;render()});}
+function tree(){const el=document.getElementById("tree");const pool=D.occurrences.filter(o=>o.domain==tab);
+  if(!pool.length){el.innerHTML=`<span style="color:var(--muted)">—</span>`;return}
+  const T={};pool.forEach(o=>{let path;
+    if(o.acceptedNameUsage){path=[o.class,o.order,o.family].filter(Boolean).map(x=>({k:x,q:x,lab:hl(x,L)||x,sci:x}));if(o.acceptedNameUsage!=o.family)path.push({k:o.acceptedNameUsage,q:o.acceptedNameUsage,lab:cn(o),sci:o.acceptedNameUsage,leaf:1})}
+    else{const c=L=="es"?o.category_es:o.category_en;path=[{k:"c:"+o.category_en,q:o.category_en,lab:c,sci:c},{k:o.occurrenceID,q:o.vernacularName_en,lab:cn(o),sci:cn(o),leaf:1}]}
+    let n=T;for(const p of path){n[p.k]??={p,c:{}};n=n[p.k].c}});
+  const rnd=n=>"<ul>"+Object.values(n).map(({p,c})=>`<li><span data-q="${p.q}">${p.lab}</span>${!p.leaf&&p.sci!=p.lab?` <span class="sci" data-q="${p.q}">${p.sci}</span>`:""}${Object.keys(c).length?rnd(c):""}</li>`).join("")+"</ul>";
+  el.innerHTML=rnd(T);el.querySelectorAll("[data-q]").forEach(s=>s.onclick=()=>setQ(s.dataset.q));}
+// viewer
+const V=document.getElementById("viewer"),VI=document.getElementById("vimg");let z=1,x=0,y=0,fit=1,drag=null,hiS=0,hiOn=false,hiReq=false;
+const VH=document.getElementById("vhi");
+function maybeHi(){if(hiOn||hiReq||!cur)return;const m=media[cur.mids[mi]];if(!m||!m.zen||!m.zen.iiif)return;hiReq=true;const want=cur.mids[mi];VH.textContent=UI[L].hiLoad;VH.style.display="block";const im=new Image();im.onload=()=>{if(cur&&cur.mids[mi]==want){hiS=im.naturalWidth/VI.naturalWidth;VI.src=im.src}};im.onerror=()=>{VH.style.display="none"};im.src=`https://zenodo.org/api/iiif/record:${m.zen.r}:${encodeURIComponent(m.zen.f)}/full/max/0/default.jpg`}
+const ap=()=>VI.style.transform=`translate(${x}px,${y}px) scale(${z})`;
+function doFit(){const W=V.clientWidth,Hh=V.clientHeight,w=VI.naturalWidth,h=VI.naturalHeight;fit=Math.min(W/w,Hh/h);z=fit;x=(W-w*z)/2;y=(Hh-h*z)/2;ap()}
+function zoomAt(f,cx,cy){const nz=Math.min(Math.max(z*f,fit),Math.max(fit*8,hiOn?2:0));x=cx-(cx-x)*nz/z;y=cy-(cy-y)*nz/z;z=nz;ap();if(nz>Math.min(1,fit*2))maybeHi()}
+V.addEventListener("wheel",e=>{e.preventDefault();const r=V.getBoundingClientRect();zoomAt(e.deltaY<0?1.15:1/1.15,e.clientX-r.left,e.clientY-r.top)},{passive:false});
+V.addEventListener("pointerdown",e=>{if(e.target.tagName=="BUTTON")return;drag=[e.clientX-x,e.clientY-y];V.setPointerCapture(e.pointerId);V.style.cursor="grabbing"});
+V.addEventListener("pointermove",e=>{if(drag){x=e.clientX-drag[0];y=e.clientY-drag[1];ap()}});
+V.addEventListener("pointerup",()=>{drag=null;V.style.cursor="grab"});
+V.addEventListener("dblclick",e=>{const r=V.getBoundingClientRect();zoomAt(2,e.clientX-r.left,e.clientY-r.top)});
+document.getElementById("zin").onclick=()=>zoomAt(1.4,V.clientWidth/2,V.clientHeight/2);document.getElementById("zout").onclick=()=>zoomAt(1/1.4,V.clientWidth/2,V.clientHeight/2);document.getElementById("zfit").onclick=doFit;
+VI.onload=()=>{if(hiS){z/=hiS;fit/=hiS;hiS=0;hiOn=true;ap();VH.textContent="✓ "+UI[L].hiDone;setTimeout(()=>VH.style.display="none",2500);return}doFit()};window.addEventListener("resize",()=>{if(cur)doFit()});
+function showMedia(i){mi=i;hiOn=false;hiReq=false;hiS=0;VH.style.display="none";VI.src=D.images[cur.mids[i]];document.querySelectorAll(".strip img").forEach((im,j)=>im.classList.toggle("on",j==i));fillInfo()}
+function openRec(id){cur=D.occurrences.find(o=>o.occurrenceID==id);document.getElementById("modal").style.display="block";document.body.style.overflow="hidden";
+  document.getElementById("strip").innerHTML=cur.mids.length>1?cur.mids.map((m,i)=>`<img src="${D.images[m]}" data-i="${i}">`).join(""):"";
+  document.getElementById("strip").style.display=cur.mids.length>1?"flex":"none";
+  document.querySelectorAll(".strip img").forEach(im=>im.onclick=()=>showMedia(+im.dataset.i));showMedia(0);}
+function closeRec(){document.getElementById("modal").style.display="none";document.body.style.overflow="";cur=null}
+document.getElementById("close").onclick=closeRec;document.addEventListener("keydown",e=>{if(e.key=="Escape"&&cur)closeRec()});
+function fillInfo(){const u=UI[L],o=cur,m=media[o.mids[mi]];const other=L=="es"?o.vernacularName_en:o.vernacularName_es;
+  const crumbs=!o.acceptedNameUsage?`<a data-q="${o.category_en}">${L=="es"?o.category_es:o.category_en}</a>`:[["kingdom",o.kingdom],["class",o.class],["order",o.order],["family",o.family],["genus",o.genus],["species",o.acceptedNameUsage]]
+   .map(([r,v])=>`<a data-q="${v}" title="${u.rank[r]||r}">${["genus","species"].includes(r)?"<i>"+v+"</i>":v}${hl(v,L)&&hl(v,L)!=v?" ("+hl(v,L)+")":""}</a>`).filter((x,i,a)=>a.indexOf(x)==i).join(" › ");
+  const tr=s=>({male:u.male,female:u.female,adult:u.adult}[s]||s);
+  const assoc=o.assoc.map(a=>`${(D.assocNames[a]||[a,a])[L=="es"?1:0]} (<i>${a}</i>)`).join(", ");
+  const rows=Object.entries(o).filter(([k,v])=>!["mids","assoc","nameText","blobN","blobH","blobC","caption_en","caption_es","subjectPart_es","phenology_es","reproductiveCondition_es","category_es","keywords_es"].includes(k)&&v!==""&&v!==null);
+  const mrows=Object.entries(m).filter(([k,v])=>!["caption_en","caption_es","occurrenceID"].includes(k)&&v!==""&&v!==null);
+  const year=o.eventDate.slice(0,4);
+  document.getElementById("info").innerHTML=`<h2>${cn(o)}${o.individualCount>1?" ×"+o.individualCount:""}</h2><div class="alt">${o.scientificName?`<i>${o.scientificName}</i> · `:""}${other}</div>
+  <p>${(L=="es"?(m.caption_es||o.caption_es):(m.caption_en||o.caption_en))}</p><div class="crumbs">${crumbs}</div>
+  <div class="facts"><span><b>${u.date}</b>${fmtDate(o)}</span><span><b>${u.time}</b>${o.eventDate.slice(11,16)}</span>
+  <span><b>${u.where}</b>${D.park} — ${o.locationSensitivity=="withhold location"?u.withheld:((m.locality||o.localityDetail)?(m.locality||o.localityDetail)+((m.locality?m.localityRemarks:o.localityRemarks)?` (${u.fromFile})`:""):u.pending)+(o.locationSensitivity.startsWith("generalise")?"; "+u.generalised:"")}</span>${o.individualCount>1?`<span><b>${u.count}</b>${o.individualCount}</span>`:""}
+  ${o.sex?`<span><b>${u.sex}</b>${tr(o.sex)}</span>`:""}${o.lifeStage?`<span><b>${u.stage}</b>${tr(o.lifeStage)}</span>`:""}${o.domain=="flora"?`<span><b>${u.part}</b>${L=="es"?o.subjectPart_es:o.subjectPart}</span>`:""}${o.phenology?`<span><b>${u.phen}</b>${L=="es"?o.phenology_es:o.phenology}</span>`:""}${assoc?`<span><b>${u.with}</b>${assoc}</span>`:""}</div>
+  ${o.conservationStatus?`<div class="consbox">${o.conservationStatus}</div>`:""}${(()=>{const st=o.identificationVerificationStatus;const [txt,ok]=st.startsWith("suggested")?[u.idnote,0]:st.startsWith("identified")?[u.idPhot,1]:st.startsWith("unidentified")?[u.idUn,0]:[u.idDesc,1];
+   return `<div class="idbox" style="${ok?"background:#eef4ea;border-left-color:var(--sage)":""}">${txt} ${o.identificationRemarks}</div>`})()}
+  <details><summary>${o.acceptedNameUsage?u.sci:u.det}</summary><table>${rows.map(([k,v])=>`<tr><td>${k}</td><td>${v}</td></tr>`).join("")}
+  <tr><td colspan=2 style="font-weight:600;color:var(--ink);font-family:inherit">${u.exif} ${mi+1}/${o.mids.length}</td></tr>${mrows.map(([k,v])=>`<tr><td>${k}</td><td>${v}</td></tr>`).join("")}</table></details>
+  <div class="dl">${m.zen?`<a class="zen" href="https://zenodo.org/records/${m.zen.r}/files/${encodeURIComponent(m.zen.f)}?download=1" target="_blank" rel="noopener">⬇ ${u.orig} (${m.zen.f.split(".").pop().toUpperCase()}, ${(m.zen.s/1e6).toFixed(1)} MB)</a><br>`:""}${o.zenodoDOI?`<a class="zen" href="https://doi.org/${o.zenodoDOI}" target="_blank" rel="noopener">⬇ ${u.zen}</a> · `:""}${o.taxonID_GBIF?`<a href="https://www.gbif.org/species/${o.taxonID_GBIF}" target="_blank" rel="noopener">${u.gbif}</a> · `:""}<b>${u.cite}:</b> Lomax, Geoffrey (${year}). ${o.acceptedNameUsage?`<i>${o.acceptedNameUsage}</i>`:o.vernacularName_en}, ${D.park}. ${o.zenodoDOI?`Anza Borrego Natural and Human History. ${u.zcite}. https://doi.org/${o.zenodoDOI}`:`${D.park.split(" ")[0]} Natural History Archive, ${m.identifier}`}.</div>`;
+  document.querySelectorAll("#info [data-q]").forEach(a=>a.onclick=()=>{closeRec();setQ(a.dataset.q)});}
+function applyLang(){const u=UI[L];document.documentElement.lang=L;["title","sub","banner","browse","month","placeF","part","filters","cons","foot"].forEach(k=>{const e=document.getElementById("t_"+k);if(e)e.textContent=u[k]});
+  document.getElementById("reset").textContent=u.reset;q.placeholder=u.ph;document.querySelectorAll(".lang button").forEach(b=>b.classList.toggle("on",b.dataset.l==L));tree();render();if(cur)fillInfo();}
+document.querySelectorAll(".lang button").forEach(b=>b.onclick=()=>{L=b.dataset.l;applyLang()});
+document.getElementById("fcons").onchange=render;document.getElementById("reset").onclick=()=>{q.value="";month=null;place=null;part=null;document.getElementById("fcons").checked=false;render()};
+applyLang();
+</script></body></html>
