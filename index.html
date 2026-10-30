@@ -45,7 +45,7 @@ label.chk{display:flex;gap:6px;align-items:center;margin:4px 0;cursor:pointer}
 .viewer img{position:absolute;left:0;top:0;transform-origin:0 0;user-select:none;-webkit-user-drag:none;max-width:none}
 .vctl{position:absolute;right:10px;bottom:10px;display:flex;gap:6px}.vctl button{background:rgba(255,255,255,.85);border:none;border-radius:6px;width:34px;height:34px;font-size:1.1rem;cursor:pointer}
 .close{position:absolute;right:12px;top:10px;background:rgba(255,255,255,.9);border:none;border-radius:50%;width:36px;height:36px;font-size:1.3rem;cursor:pointer;z-index:3}
-.strip{display:flex;gap:6px;padding:8px;background:#222}.strip img{height:60px;border-radius:4px;opacity:.6;cursor:pointer;border:2px solid transparent}.strip img.on{opacity:1;border-color:var(--accent)}
+.strip{display:flex;gap:6px;padding:8px;background:#222;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:#888 #222}.strip::-webkit-scrollbar{height:8px}.strip::-webkit-scrollbar-thumb{background:#888;border-radius:4px}.strip img{flex:0 0 auto;height:60px;border-radius:4px;opacity:.6;cursor:pointer;border:2px solid transparent}.strip img.on{opacity:1;border-color:var(--accent)}
 .info{padding:18px 24px 26px}.info h2{margin:0;font-size:1.5rem}.info .alt{color:var(--muted);margin-top:2px}
 .crumbs{margin:10px 0;font-size:.88rem}.crumbs a{color:var(--sage);cursor:pointer;text-decoration:none;border-bottom:1px dotted}.crumbs a:hover{color:var(--accent)}
 .facts{display:flex;flex-wrap:wrap;gap:8px 22px;font-size:.9rem;margin:12px 0}.facts b{color:var(--muted);font-weight:600;margin-right:4px}
@@ -66,7 +66,7 @@ details table{border-collapse:collapse;width:100%;font-size:.84rem}details td{pa
 .back{background:none;border:none;color:var(--accent);font-weight:600;cursor:pointer;padding:0;margin-bottom:10px}
 footer{text-align:center;color:var(--muted);font-size:.8rem;padding:20px}
 @media(max-width:800px){main{grid-template-columns:1fr}aside{position:static}}
-.dl a.zen{font-weight:600}.vhi{display:none;position:absolute;left:10px;bottom:10px;background:rgba(0,0,0,.65);color:#fff;font-size:12px;padding:4px 8px;border-radius:4px;z-index:3}</style></head><body>
+.dl a.zen{font-weight:600}.vhi{display:none;position:absolute;left:10px;bottom:10px;background:rgba(0,0,0,.65);color:#fff;font-size:12px;padding:4px 8px;border-radius:4px;z-index:3}.vnav{position:absolute;top:50%;transform:translateY(-50%);z-index:3;background:rgba(255,255,255,.85);border:none;border-radius:50%;width:44px;height:44px;font-size:1.8rem;line-height:1;cursor:pointer;display:none}#vprev{left:10px}#vnext{right:10px}.vnav:hover{background:#fff}.vcount{position:absolute;left:10px;top:10px;z-index:3;background:rgba(0,0,0,.6);color:#fff;font-size:13px;padding:3px 9px;border-radius:12px;display:none}</style></head><body>
 <header><div class="topbar"><div><h1 id="t_title"></h1><p id="t_sub"></p></div>
 <div class="lang"><button data-l="en">EN</button> <button data-l="es">ES</button></div></div></header>
 <nav class="tabs" id="tabs"></nav>
@@ -82,7 +82,7 @@ footer{text-align:center;color:var(--muted);font-size:.8rem;padding:20px}
 <label class="chk"><input type="checkbox" id="fcons"> <span id="t_cons"></span></label>
 <button class="reset" id="reset"></button>
 </aside><section><p class="count" id="count"></p><div class="grid" id="grid"></div></section></main>
-<div class="modal" id="modal"><div class="panel"><div class="viewer" id="viewer"><button class="close" id="close">×</button><img id="vimg"><div id="vhi" class="vhi"></div><div class="vctl"><button id="zin">+</button><button id="zout">−</button><button id="zfit">⤢</button></div></div>
+<div class="modal" id="modal"><div class="panel"><div class="viewer" id="viewer"><button class="close" id="close">×</button><img id="vimg"><div id="vhi" class="vhi"></div><button class="vnav" id="vprev" aria-label="Previous photo">‹</button><button class="vnav" id="vnext" aria-label="Next photo">›</button><div class="vcount" id="vcount"></div><div class="vctl"><button id="zin">+</button><button id="zout">−</button><button id="zfit">⤢</button></div></div>
 <div class="strip" id="strip"></div><div class="info" id="info"></div></div></div>
 <footer id="t_foot"></footer>
 <script>
@@ -250,7 +250,11 @@ V.addEventListener("pointerup",()=>{drag=null;V.style.cursor="grab"});
 V.addEventListener("dblclick",e=>{const r=V.getBoundingClientRect();zoomAt(2,e.clientX-r.left,e.clientY-r.top)});
 document.getElementById("zin").onclick=()=>zoomAt(1.4,V.clientWidth/2,V.clientHeight/2);document.getElementById("zout").onclick=()=>zoomAt(1/1.4,V.clientWidth/2,V.clientHeight/2);document.getElementById("zfit").onclick=doFit;
 VI.onload=()=>{if(hiS){z/=hiS;fit/=hiS;hiS=0;hiOn=true;ap();VH.textContent="✓ "+UI[L].hiDone;setTimeout(()=>VH.style.display="none",2500);return}doFit()};window.addEventListener("resize",()=>{if(cur)doFit()});
-function showMedia(i){mi=i;hiOn=false;hiReq=false;hiS=0;VH.style.display="none";VI.src=D.images[cur.mids[i]];document.querySelectorAll(".strip img").forEach((im,j)=>im.classList.toggle("on",j==i));fillInfo()}
+function showMedia(i){mi=i;hiOn=false;hiReq=false;hiS=0;VH.style.display="none";VI.src=D.images[cur.mids[i]];document.querySelectorAll(".strip img").forEach((im,j)=>{im.classList.toggle("on",j==i);if(j==i){const S=document.getElementById("strip");if(S.scrollWidth>S.clientWidth)S.scrollTo({left:im.offsetLeft-S.clientWidth/2+im.offsetWidth/2,behavior:"smooth"})}});const n=cur.mids.length;["vprev","vnext"].forEach(x=>document.getElementById(x).style.display=n>1?"block":"none");const vc=document.getElementById("vcount");vc.style.display=n>1?"block":"none";vc.textContent=(i+1)+" / "+n;fillInfo()}
+function stepMedia(d){if(!cur||cur.mids.length<2)return;showMedia((mi+d+cur.mids.length)%cur.mids.length)}
+document.getElementById("vprev").onclick=e=>{e.stopPropagation();stepMedia(-1)};document.getElementById("vnext").onclick=e=>{e.stopPropagation();stepMedia(1)};
+["vprev","vnext"].forEach(x=>document.getElementById(x).addEventListener("pointerdown",e=>e.stopPropagation()));
+document.addEventListener("keydown",e=>{if(!cur)return;if(e.key=="ArrowRight"){e.preventDefault();stepMedia(1)}else if(e.key=="ArrowLeft"){e.preventDefault();stepMedia(-1)}});
 function openRec(id){cur=D.occurrences.find(o=>o.occurrenceID==id);document.getElementById("modal").style.display="block";document.body.style.overflow="hidden";
   document.getElementById("strip").innerHTML=cur.mids.length>1?cur.mids.map((m,i)=>`<img src="${D.images[m]}" data-i="${i}">`).join(""):"";
   document.getElementById("strip").style.display=cur.mids.length>1?"flex":"none";
