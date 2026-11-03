@@ -100,7 +100,7 @@ where:"Location",pending:"precise locality pending",sci:"Scientific details",idn
 gbif:"View taxon on GBIF",orig:"This photo: original file",hiLoad:"Loading full resolution from Zenodo…",hiDone:"Full resolution",zen:"Full-resolution originals on Zenodo",zcite:"Zenodo",cite:"Cite as",exif:"Photo",months:["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
 foot:"Anza-Borrego Natural History Archive · Darwin Core & Audubon Core metadata · taxonomy: GBIF Backbone",male:"male",female:"female",adult:"adult",syn:"synonym of",pw:"pictured with",
 rank:{class:"class",order:"order",family:"family",genus:"genus",species:"species",record:"record",category:"category"},
-tabs:{fauna:"Fauna",flora:"Flora",geology:"Geology",places:"Places",built:"Built environment"},placeF:"Place",
+tabs:{fauna:"Fauna",flora:"Flora",geology:"Geology",places:"Places",rainbows:"Rainbows",built:"Built environment"},placeF:"Place",
 emBuilt:"No built-environment records yet.",emBuilt2:"Historic and abandoned structures, roads, mines and settlements of the park, recording its human history.",
 landH:"Landscapes and weather",withheld:"Location withheld to protect a sensitive species",withheldGrp:"Location withheld (sensitive species)",
 generalised:"precise location generalised to protect a sensitive species",fromFile:"from filename, to be confirmed",
@@ -121,7 +121,7 @@ where:"Ubicación",pending:"localidad precisa pendiente",sci:"Detalles científi
 gbif:"Ver taxón en GBIF",orig:"Esta foto: archivo original",hiLoad:"Cargando resolución completa desde Zenodo…",hiDone:"Resolución completa",zen:"Originales en alta resolución en Zenodo",zcite:"Zenodo",cite:"Citar como",exif:"Foto",months:["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"],
 foot:"Archivo de Historia Natural de Anza-Borrego · metadatos Darwin Core y Audubon Core · taxonomía: GBIF Backbone",male:"macho",female:"hembra",adult:"adulto",syn:"sinónimo de",pw:"fotografiado con",
 rank:{class:"clase",order:"orden",family:"familia",genus:"género",species:"especie",record:"registro",category:"categoría"},
-tabs:{fauna:"Fauna",flora:"Flora",geology:"Geología",places:"Lugares",built:"Entorno construido"},placeF:"Lugar",
+tabs:{fauna:"Fauna",flora:"Flora",geology:"Geología",places:"Lugares",rainbows:"Arcoíris",built:"Entorno construido"},placeF:"Lugar",
 emBuilt:"Aún no hay registros del entorno construido.",emBuilt2:"Estructuras históricas y abandonadas, caminos, minas y asentamientos del parque, que registran su historia humana.",
 landH:"Paisajes y clima",withheld:"Ubicación reservada para proteger una especie sensible",withheldGrp:"Ubicación reservada (especies sensibles)",
 generalised:"ubicación precisa generalizada para proteger una especie sensible",fromFile:"tomado del nombre del archivo, por confirmar",
@@ -134,7 +134,7 @@ placesH:"Lugares del parque",noLoc:"Localidad aún no registrada",noLoc2:"Agregu
 allPlaces:"← Todos los lugares",tabCount:(n,t)=>`${n} en ${t}`,also:"También coinciden:",
 rank2:{}}};
 let L=(navigator.language||"en").startsWith("es")?"es":"en", month=null, cur=null, mi=0, place=null, part=null;
-const TABS=["fauna","flora","geology","places","built"]; const DOMS=["fauna","flora","geology","places","built"]; let tab=TABS.includes(location.hash.slice(1))?location.hash.slice(1):"fauna";
+const TABS=["fauna","flora","geology","places","rainbows","built"]; const DOMS=["fauna","flora","geology","places","rainbows","built"]; let tab=TABS.includes(location.hash.slice(1))?location.hash.slice(1):"fauna";
 function setTab(t){tab=t;place=null;month=null;part=null;try{history.replaceState(null,"","#"+t)}catch(e){};tree();render()}
 const norm=s=>(s||"").toString().normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/'s\b/g,"").replace(/[^a-z0-9]+/g," ").trim();
 const H=D.higher, media=Object.fromEntries(D.media.map(m=>[m.identifier,m]));
@@ -204,7 +204,7 @@ function render(){const u=UI[L],qn=norm(q.value),G=document.getElementById("grid
       if(!R.length&&!qn)html=`<div class="empty"><h3>${u.emFlora}</h3>${u.emFlora2}</div>`;
     }
     if(tab=="geology"&&!R.length&&!qn)html=`<div class="empty"><h3>${u.emGeo}</h3>${u.emGeo2}</div>`;
-    if(tab=="places"&&!R.length&&!qn)html=`<div class="empty">${u.emAny}</div>`;
+    if((tab=="places"||tab=="rainbows")&&!R.length&&!qn)html=`<div class="empty">${u.emAny}</div>`;
     if(tab=="built"&&!R.length&&!qn)html=`<div class="empty"><h3>${u.emBuilt}</h3>${u.emBuilt2}</div>`;
     if(!R.length&&qn&&!html){const other=DOMS.filter(t=>t!=tab&&per[t].length);
       if(other.length)hint.innerHTML=`${u.also} `+other.map(t=>`<a data-t="${t}">${u.tabCount(per[t].length,u.tabs[t])}</a>`).join(" · ");
