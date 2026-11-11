@@ -43,7 +43,7 @@ label.chk{display:flex;gap:6px;align-items:center;margin:4px 0;cursor:pointer}
 .panel{background:#fff;max-width:1200px;margin:24px auto;border-radius:12px;overflow:hidden}
 .viewer{background:#111;position:relative;height:62vh;overflow:hidden;cursor:grab;touch-action:none}
 .viewer img{position:absolute;left:0;top:0;transform-origin:0 0;user-select:none;-webkit-user-drag:none;max-width:none}
-.vctl{position:absolute;right:10px;bottom:10px;display:flex;gap:6px}.vctl button{background:rgba(255,255,255,.85);border:none;border-radius:6px;width:34px;height:34px;font-size:1.1rem;cursor:pointer}
+.vctl{position:absolute;right:10px;bottom:10px;display:flex;gap:6px;z-index:5}.viewer:fullscreen{height:100vh;width:100vw}.viewer:-webkit-full-screen{height:100vh;width:100vw}.vctl button{background:rgba(255,255,255,.85);border:none;border-radius:6px;width:34px;height:34px;font-size:1.1rem;cursor:pointer}
 .close{position:absolute;right:12px;top:10px;background:rgba(255,255,255,.9);border:none;border-radius:50%;width:36px;height:36px;font-size:1.3rem;cursor:pointer;z-index:3}
 .strip{display:flex;flex-wrap:wrap;gap:6px;padding:8px;background:#222}@media(max-width:600px){.strip img{height:48px}}.strip img{flex:0 0 auto;height:60px;border-radius:4px;opacity:.6;cursor:pointer;border:2px solid transparent}.strip img.on{opacity:1;border-color:var(--accent)}
 .info{padding:18px 24px 26px}.info h2{margin:0;font-size:1.5rem}.info .alt{color:var(--muted);margin-top:2px}
@@ -85,7 +85,7 @@ footer{text-align:center;color:var(--muted);font-size:.8rem;padding:20px}
 <label class="chk"><input type="checkbox" id="fcons"> <span id="t_cons"></span></label>
 <button class="reset" id="reset"></button>
 </aside><section><p class="count" id="count"></p><div class="grid" id="grid"></div></section></main>
-<div class="modal" id="modal"><div class="panel"><div class="viewer" id="viewer"><button class="close" id="close">×</button><img id="vimg"><div id="vhi" class="vhi"></div><button class="vnav" id="vprev" aria-label="Previous photo">‹</button><button class="vnav" id="vnext" aria-label="Next photo">›</button><div class="vcount" id="vcount"></div><div class="vctl"><button id="zin">+</button><button id="zout">−</button><button id="zfit">⤢</button></div></div>
+<div class="modal" id="modal"><div class="panel"><div class="viewer" id="viewer"><button class="close" id="close">×</button><img id="vimg"><div id="vhi" class="vhi"></div><button class="vnav" id="vprev" aria-label="Previous photo">‹</button><button class="vnav" id="vnext" aria-label="Next photo">›</button><div class="vcount" id="vcount"></div><div class="vctl" id="vctl"><button id="zin" type="button" title="Zoom in">+</button><button id="zout" type="button" title="Zoom out">−</button><button id="zfit" type="button" title="Fit photo to window">⤢</button><button id="zfull" type="button" title="Full screen">⛶</button></div></div>
 <div class="strip" id="strip"></div><div class="info" id="info"></div></div></div>
 <footer id="t_foot"></footer>
 <script>
@@ -244,16 +244,22 @@ const V=document.getElementById("viewer"),VI=document.getElementById("vimg");let
 const VH=document.getElementById("vhi");
 function maybeHi(){if(hiOn||hiReq||!cur)return;const m=media[cur.mids[mi]];if(!m||!m.zen||!m.zen.iiif)return;hiReq=true;const want=cur.mids[mi];VH.textContent=UI[L].hiLoad;VH.style.display="block";const im=new Image();im.onload=()=>{if(cur&&cur.mids[mi]==want){hiS=im.naturalWidth/VI.naturalWidth;VI.src=im.src}};im.onerror=()=>{VH.style.display="none"};im.src=`https://zenodo.org/api/iiif/record:${m.zen.r}:${encodeURIComponent(m.zen.f)}/full/max/0/default.jpg`}
 const ap=()=>VI.style.transform=`translate(${x}px,${y}px) scale(${z})`;
-function doFit(){const W=V.clientWidth,Hh=V.clientHeight,w=VI.naturalWidth,h=VI.naturalHeight;fit=Math.min(W/w,Hh/h);z=fit;x=(W-w*z)/2;y=(Hh-h*z)/2;ap()}
+function doFit(){const W=V.clientWidth,Hh=V.clientHeight,w=VI.naturalWidth,h=VI.naturalHeight;if(!W||!Hh||!w||!h)return;fit=Math.min(W/w,Hh/h);z=fit;x=(W-w*z)/2;y=(Hh-h*z)/2;ap()}
 function zoomAt(f,cx,cy){const nz=Math.min(Math.max(z*f,fit),Math.max(fit*8,hiOn?2:0));x=cx-(cx-x)*nz/z;y=cy-(cy-y)*nz/z;z=nz;ap();if(nz>Math.min(1,fit*2))maybeHi()}
 V.addEventListener("wheel",e=>{e.preventDefault();const r=V.getBoundingClientRect();zoomAt(e.deltaY<0?1.15:1/1.15,e.clientX-r.left,e.clientY-r.top)},{passive:false});
 V.addEventListener("pointerdown",e=>{if(e.target.tagName=="BUTTON")return;drag=[e.clientX-x,e.clientY-y];V.setPointerCapture(e.pointerId);V.style.cursor="grabbing"});
 V.addEventListener("pointermove",e=>{if(drag){x=e.clientX-drag[0];y=e.clientY-drag[1];ap()}});
 V.addEventListener("pointerup",()=>{drag=null;V.style.cursor="grab"});
 V.addEventListener("dblclick",e=>{const r=V.getBoundingClientRect();zoomAt(2,e.clientX-r.left,e.clientY-r.top)});
-document.getElementById("zin").onclick=()=>zoomAt(1.4,V.clientWidth/2,V.clientHeight/2);document.getElementById("zout").onclick=()=>zoomAt(1/1.4,V.clientWidth/2,V.clientHeight/2);document.getElementById("zfit").onclick=doFit;
-VI.onload=()=>{if(hiS){z/=hiS;fit/=hiS;hiS=0;hiOn=true;ap();VH.textContent="✓ "+UI[L].hiDone;setTimeout(()=>VH.style.display="none",2500);return}doFit()};window.addEventListener("resize",()=>{if(cur)doFit()});
-function showMedia(i){mi=i;hiOn=false;hiReq=false;hiS=0;VH.style.display="none";VI.src=D.images[cur.mids[i]];document.querySelectorAll(".strip img").forEach((im,j)=>{im.classList.toggle("on",j==i);if(j==i){const S=document.getElementById("strip");if(S.scrollWidth>S.clientWidth)S.scrollTo({left:im.offsetLeft-S.clientWidth/2+im.offsetWidth/2,behavior:"smooth"})}});const n=cur.mids.length;["vprev","vnext"].forEach(x=>document.getElementById(x).style.display=n>1?"block":"none");const vc=document.getElementById("vcount");vc.style.display=n>1?"block":"none";vc.textContent=(i+1)+" / "+n;fillInfo()}
+const VC=document.getElementById("vctl");["pointerdown","pointerup","dblclick","wheel"].forEach(t=>VC.addEventListener(t,e=>e.stopPropagation()));
+const zbtn=(id,fn)=>document.getElementById(id).addEventListener("click",e=>{e.preventDefault();e.stopPropagation();fn()});
+zbtn("zin",()=>zoomAt(1.4,V.clientWidth/2,V.clientHeight/2));zbtn("zout",()=>zoomAt(1/1.4,V.clientWidth/2,V.clientHeight/2));zbtn("zfit",doFit);
+const fsEl=()=>document.fullscreenElement||document.webkitFullscreenElement;
+zbtn("zfull",()=>{if(fsEl()){(document.exitFullscreen||document.webkitExitFullscreen).call(document)}else{const f=V.requestFullscreen||V.webkitRequestFullscreen;if(f)f.call(V);else{V.style.height=V.style.height?"":"92vh"}}setTimeout(()=>{if(cur)doFit()},250)});
+["fullscreenchange","webkitfullscreenchange"].forEach(t=>document.addEventListener(t,()=>{document.getElementById("zfull").textContent=fsEl()?"✕":"⛶";setTimeout(()=>{if(cur)doFit()},100)}));
+VI.onload=()=>{if(hiS){z/=hiS;fit/=hiS;hiS=0;hiOn=true;ap();VH.textContent="✓ "+UI[L].hiDone;setTimeout(()=>VH.style.display="none",2500);return}doFit()};
+let rzT=0;window.addEventListener("resize",()=>{clearTimeout(rzT);rzT=setTimeout(()=>{if(cur&&Math.abs(z-fit)<1e-6)doFit()},150)});
+function showMedia(i){mi=i;const es=L=="es";[["zin",es?"Acercar":"Zoom in"],["zout",es?"Alejar":"Zoom out"],["zfit",es?"Ajustar la foto a la ventana":"Fit photo to window"],["zfull",es?"Pantalla completa":"Full screen"]].forEach(([id,t])=>document.getElementById(id).title=t);hiOn=false;hiReq=false;hiS=0;VH.style.display="none";VI.src=D.images[cur.mids[i]];document.querySelectorAll(".strip img").forEach((im,j)=>{im.classList.toggle("on",j==i);if(j==i){const S=document.getElementById("strip");if(S.scrollWidth>S.clientWidth)S.scrollTo({left:im.offsetLeft-S.clientWidth/2+im.offsetWidth/2,behavior:"smooth"})}});const n=cur.mids.length;["vprev","vnext"].forEach(x=>document.getElementById(x).style.display=n>1?"block":"none");const vc=document.getElementById("vcount");vc.style.display=n>1?"block":"none";vc.textContent=(i+1)+" / "+n;fillInfo()}
 function stepMedia(d){if(!cur||cur.mids.length<2)return;showMedia((mi+d+cur.mids.length)%cur.mids.length)}
 document.getElementById("vprev").onclick=e=>{e.stopPropagation();stepMedia(-1)};document.getElementById("vnext").onclick=e=>{e.stopPropagation();stepMedia(1)};
 ["vprev","vnext"].forEach(x=>document.getElementById(x).addEventListener("pointerdown",e=>e.stopPropagation()));
@@ -263,7 +269,7 @@ function openRec(id){cur=D.occurrences.find(o=>o.occurrenceID==id);document.getE
   document.getElementById("strip").style.display=cur.mids.length>1?"flex":"none";
   document.querySelectorAll(".strip img").forEach(im=>im.onclick=()=>showMedia(+im.dataset.i));showMedia(0);}
 function closeRec(){document.getElementById("modal").style.display="none";document.body.style.overflow="";cur=null}
-document.getElementById("close").onclick=closeRec;document.addEventListener("keydown",e=>{if(e.key=="Escape"&&cur)closeRec()});
+document.getElementById("close").onclick=closeRec;document.addEventListener("keydown",e=>{if(e.key=="Escape"&&cur&&!(document.fullscreenElement||document.webkitFullscreenElement))closeRec()});
 function fillInfo(){const u=UI[L],o=cur,m=media[o.mids[mi]];const other=L=="es"?o.vernacularName_en:o.vernacularName_es;
   const crumbs=!o.acceptedNameUsage?`<a data-q="${o.category_en}">${L=="es"?o.category_es:o.category_en}</a>`:[["kingdom",o.kingdom],["class",o.class],["order",o.order],["family",o.family],["genus",o.genus],["species",o.acceptedNameUsage]]
    .map(([r,v])=>`<a data-q="${v}" title="${u.rank[r]||r}">${["genus","species"].includes(r)?"<i>"+v+"</i>":v}${hl(v,L)&&hl(v,L)!=v?" ("+hl(v,L)+")":""}</a>`).filter((x,i,a)=>a.indexOf(x)==i).join(" › ");
